@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1 class="display-4">Welcome to MeetSync</h1>
+    {% if user.is_authenticated %}
+        <p><strong>Hello, {{ user.username }} you can create the meeting</strong></p>
+    {% endif %}
+    <!-- <p class="lead font-italic">Meeting From Here</p> -->
+    <div class="d-flex justify-content-end mt-3">
+        <button type="button" class="btn btn-secondary"  data-toggle="modal" data-target="#meetingsModal">Meeting Pdf</button> 
+    </div>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                   <p><strong>{{ message }}</strong></p> 
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <h1>Meeting List</h1>
+    <hr class="my-4">
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th scope="col"><strong>Title Of The Meetings</strong> </th>
+                    <th scope="col"><strong>Date Of The Meetings</strong> </th>
+                    <th scope="col"><strong>Chair Of The Meetings</strong></th>
+                    <th scope="col"><strong>Location Of The Meetings</strong></th>
+                    <th scope="col"><strong>Actions</strong></th>
+                </tr>
+            </thead>
+            <tbody class="table-content">
+                {% for meeting in meetings %}
+                    <tr>
+                        <td>{{ meeting.title }}</td>
+                        <td>{{ meeting.date }}</td>
+                        <td>{{ meeting.chair_meeting }}</td>
+                        <td>{{ meeting.location }}</td>
+                        <td>
+                            
+                        {% if not meeting.is_completed %}
+                        <button type="button" class="btn text-secondary px-0" data-toggle="modal" data-target="#joinModal-{{ meeting.id }}">
+                            <i class="far fa-edit fa-lg"></i> Join
+                        </button>
+                        {% else %}
+                            <span class="text-danger">Meeting Ended</span>
+                        {% endif %}
+                            <button type="button" class="btn text-secondary px-0" data-toggle="modal" data-target="#viewModal-{{ meeting.id }}">
+                                <i class="far fa-eye fa-lg"></i> View
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% for meeting in meetings %}
+    <!-- Join Modal -->
+    <div class="modal fade" id="joinModal-{{ meeting.id }}" tabindex="-1" aria-labelledby="JoinModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="JoinModalLabel">Join Meeting</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'join_meeting' meeting.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="attendeeName{{ meeting.id }}" class="form-label">Your Name</label>
+                            <input type="text" class="form-control" id="attendeeName{{ meeting.id }}" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="attendeeDepartment{{ meeting.id }}" class="form-label">Department</label>
+                            <select class="form-select" id="attendeeDepartment{{ meeting.id }}" name="department">
+                                <option value="HR">HR</option>
+                                <option value="Finance">Finance</option>
+                                <option value="IT">IT</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="attendeePosition{{ meeting.id }}" class="form-label">Position</label>
+                            <input type="text" class="form-control" id="attendeePosition{{ meeting.id }}" name="position" required>       
+                        </input>
+                        </div>
+                        <div class="mb-3">
+                            <label for="attendeeEmail{{ meeting.id }}" class="form-label">Your Email</label>
+                            <input type="email" class="form-control" id="attendeeEmail{{ meeting.id }}" name="email" required>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success btn-block btn-lg"><i class="fas fa-registered"></i> Join Meeting</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal fade" id="viewModal-{{ meeting.id }}" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewModalLabel">View Meeting</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Title:</strong> {{ meeting.title }}</p>
+                    <p><strong>Date:</strong> {{ meeting.date }}</p>
+                    <p><strong>Chair:</strong> {{ meeting.chair_meeting }}</p>
+                    <p><strong>Location:</strong> {{ meeting.location }}</p>
+                    <p><strong>Purpose:</strong> {{ meeting.description|safe }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+      <!-- Meetings List Modal -->
+<div class="modal fade" id="meetingsModal" tabindex="-1" aria-labelledby="meetingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="meetingsModalLabel">My Meetings</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Meeting Title</th>
+                            <th>PDF</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meeting in meetings %}
+                        <tr>
+                            <td>{{ meeting.title }}</td>
+                            <td>{{ meeting.pdf_path }}</td>
+                            <td>
+                                <a href="{% url 'download_pdf' meeting.id %}?email={{ user_email }}" class="btn btn-primary">Download PDF</a>
+
+                            
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

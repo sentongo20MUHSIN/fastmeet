@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load markup_tags %}
+{{ MeetingMinute.agenda|safe }}
+{{ MeetingMinute.discussion|safe }}
+{{ MeetingMinute.action_items_decisions|safe }}
+
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1 class="display-4"> Add Minutes </h1>
+    <p class="lead font-italic"><h1>Add Minutes for: {{ meeting.title }}</h1></p>
+    <hr class="my-4">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.media }}
+        {{ form.as_p }}
+        <button  type="submit" class="btn btn-success"><i class="fas fa-registered"></i>
+            Add Minutes</button>
+    </form>
+    <!-- <script> -->
+        <!-- $(document).ready(function() { -->
+            <!-- $('#id_agenda').summernote(); -->
+            <!-- $('#id_discussion').summernote(); -->
+            <!-- $('#id_action_items_decisions').summernote(); -->
+        <!-- }); -->
+    <!-- </script> -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock content %}
+
+

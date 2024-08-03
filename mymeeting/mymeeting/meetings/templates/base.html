@@ -1,0 +1,247 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Meeting Minutes</title>
+
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+    <link href="{% static 'summernote/summernote-bs5.min.css' %}" rel="stylesheet">
+    <style>
+        body {
+            background-color: white;
+        }
+        .navbar, footer{
+            background-color: #20B2AA; /* Darker Turquoise color for navbar */
+        }
+        .navbar-brand, .nav-link {
+            color: #fff !important; /* White color for text in navbar */
+        }
+        .jumbotron {
+            background-color: whitesmoke;
+            border:0px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .btn-primary:hover {
+            background-color:#20B2AA;
+            border-color: #20B2AA;
+        }
+        .note-editor {
+            width: 100% !important;
+            max-width: 100%;
+            height: auto !important;
+        }
+        .datetime-input {
+            width: 100%;
+            max-width: 100%;
+        }
+        .table-responsive {
+            margin-bottom: 1.5rem;
+        }
+        .table-content {
+            background-color: white;
+        }
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        .btn {
+            white-space: nowrap;
+        }
+        .responsive-heading {
+            font-size: 2.5rem; /* Default size */
+        }
+        .responsive-paragraph {
+            font-size: 1.25rem; /* Default size */
+        }
+        @media (min-width: 576px) {
+            .responsive-heading {
+                font-size: 2rem;
+            }
+            .responsive-paragraph {
+                font-size: 1rem;
+            }
+        }
+        @media (min-width: 768px) {
+            .responsive-heading {
+                font-size: 1.75rem;
+            }
+            .responsive-paragraph {
+                font-size: 0.875rem;
+            }
+        }
+        @media (min-width: 992px) {
+            .responsive-heading {
+                font-size: 1.5rem;
+            }
+            .responsive-paragraph {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="#">MeetSync</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'meeting_view' %}">Meeting Lists</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn-primary" href="{% url 'create_meeting' %}"> Create Meeting</a>
+                        </li>
+                    {% else %}
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#loginModal">Login</button>
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#registerModal">Register</button>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+        
+        <div class="col-md-10 offset-md-1 mt-5">
+            <div class="jumbotron custom-jumbotron">
+                {% block content %}
+                {% endblock content %}
+            </div>
+        </div>
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage">{{ error_message }}</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="loginModalLabel">Login Here</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'login' %}">
+                        {% csrf_token %} 
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" placeholder="Username" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password1">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="Password" name="pass" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <a href="{% url 'signup' %}">Create an account</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'signup' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input type="text" placeholder="Username" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" placeholder="Email or Phone" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password1">Password</label>
+                            <input type="password" class="form-control" id="password1" placeholder="Password" name="password1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password2">Confirm Password</label>
+                            <input type="password" placeholder="Confirm Password" class="form-control" id="password2" name="password2" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <a href="{% url 'login' %}">I already have an account</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer text-lg-start mt-5 fixed-bottom">
+        <!-- Copyright -->
+        <div class="text-center text-white p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+          © 2020 Copyright:
+          <a class="text-white" href="#">MeetSync@gmail.com</a>
+        </div>
+        <!-- Copyright -->
+    </footer>
+    <!-- Include Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.summernote').summernote({
+                height: 300,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontname', ['fontname']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
+            });
+        });
+    </script>
+    {% if show_modal %}
+    <script>
+        $(document).ready(function() {
+            $('#alertModal').modal('show');
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1 class="display-4"> Join Meeting </h1>
+    <p class="lead font-italic">Join Meeting From Here</p>
+    <hr class="my-4">
+    <h1>Join Meeting: <br>{{ meeting.title }}</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button  type="submit" class="btn btn-success"><i class="fas fa-registered"></i>
+            Join Meeting</button>
+    </form>
+   
+{% endblock content %}
+
+

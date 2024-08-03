@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1 class="display-4">Meeting Details</h1>
+<p class="lead font-italic">Meeting Details are Here</p>
+<hr class="my-4">
+<h1>Meeting: {{ meeting.title }}</h1>
+<!-- Display meeting details -->
+<p><strong>Chair:</strong> {{ meeting.chair_meeting }}</p>
+<p><strong>Date & Time:</strong> {{ meeting.date }}</p>
+<p><strong>Location:</strong> {{ meeting.location }}</p>
+<p><strong>Purpose:</strong> {{ description_cleaned|safe }}</p>
+
+<!-- Button to edit meeting details in a modal -->
+<button type="button" class="btn text-secondary px-0" data-toggle="modal" data-target="#editModal-{{ meeting.id }}">
+    <i class="far fa-edit fa-lg"></i> Edit
+</button>
+
+<!-- Attendees list -->
+<h2>Attendees:</h2>
+<table class="table table-borderless">
+    <thead class="border-bottom font-weight-bold">
+        <tr>
+            <td>Full Name</td>
+            <td>Department</td>
+            <td>Position</td>
+            <td>Actions</td>
+        </tr>
+    </thead>
+    <tbody>
+        {% for attendee in attendees %}
+            <tr>
+                <td>{{ attendee.name }}</td>
+                <td>{{ attendee.department }}</td>
+                <td>{{ attendee.position }}</td>
+                <td>
+                    {% if attendee.verified %}
+                        Verified
+                    {% else %}
+                        <form action="{% url 'verify_attendee' attendee.id %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Verify</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Minutes list -->
+<h2>Minutes:</h2>
+<ul>
+    {% for minute in processed_minutes %}
+        <li><strong>Agenda:</strong> {{ minute.agenda|safe }}</li>
+        <li><strong>Discussion:</strong> {{ minute.discussion|safe }}</li>
+        <li><strong>Action & Decisions:</strong> {{ minute.action_items_decisions|safe }}</li>
+        <li><strong>Next Meeting Date:</strong> {{ minute.next_meeting_date }}</li>
+    {% endfor %}
+</ul>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <a href="{% url 'add_minutes' meeting.id %}" class="btn btn-success btn-block btn-lg">
+                <i class="fas fa-stream"></i> Edit Minutes
+            </a> 
+        </div>
+        <div class="col-md-4">
+            {% if meeting.is_completed %}
+                <a href="{% url 'generate_pdf' meeting.id %}" class="btn btn-dark btn-block btn-lg">
+                    <i class="fas fa-stream"></i> Minutes PDF
+                </a> 
+            {% else %}
+                <button type="button" class="btn btn-primary btn-block btn-lg" data-toggle="modal" data-target="#endMeetingModal">
+                    End Meeting
+                </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal for editing meeting details -->
+<div class="modal fade" id="editModal-{{ meeting.id }}" tabindex="-1" aria-labelledby="editModalLabel{{ meeting.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel{{ meeting.id }}">Edit Meeting Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'create_meeting' meeting.id %}">
+                    {% csrf_token %}
+                    {{ meet.as_p }}
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-registered"></i> Save Changes
+                        </button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for confirming end of meeting -->
+<div class="modal fade" id="endMeetingModal" tabindex="-1" aria-labelledby="endMeetingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="endMeetingModalLabel">Confirm End Meeting</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to end this meeting?</p>
+            </div>
+            <div class="modal-footer">
+                <form method="post" action="{% url 'complete_meeting' meeting.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Yes, End Meeting</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

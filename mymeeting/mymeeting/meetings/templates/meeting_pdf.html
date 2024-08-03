@@ -1,0 +1,113 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Meeting PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+    
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 150px;
+        }
+        .header .company-details {
+            text-align: right;
+        }
+        .header .company-details p {
+            margin: 2px 0;
+        }
+        h1 {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        p {
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        .minutes-section {
+            margin-top: 30px;
+        }
+        .minutes-section h2 {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{% static 'summernote/mymeeting/mymeeting/staticfiles/summernote/Asset 1NM.png' %}" alt="Next Media">
+        <div class="company-details">
+            <p>Next Media</p>
+            <p>Plot 13, Summit View Road, Naguru</p>
+            <p>P.O. Box 7613, Kampala, Uganda</p>
+            <p>0200 330 222</p>
+        </div>
+    </div>
+    <h1>Meeting: {{ meeting.title }}</h1>
+    <p><strong>Date & Time:</strong> {{ meeting.date }}</p>
+    <p><strong>Chair Of The Meeting:</strong> {{ meeting.chair_meeting }}</p>
+    <p><strong>Location:</strong> {{ meeting.location }}</p>
+    <p><strong>Purpose:</strong> {{ description_cleaned|safe }}</p>
+    
+    <h2>Attendees:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Department</th>
+                <th>Position</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendee in attendees %}
+                <tr>
+                    <td>{{ attendee.name }}</td>
+                    <td>{{ attendee.department }}</td>
+                    <td>{{ attendee.position }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="minutes-section">
+        <h2>Minutes:</h2>
+        <ul>
+            {% for minute in processed_minutes %}
+                <li><strong>Agenda:</strong> {{ minute.agenda|safe }}</li>
+                <li><strong>Discussion:</strong> {{ minute.discussion|safe }}</li>
+                <li><strong>Action & Decisions:</strong> {{ minute.action_items_decisions|safe }}</li>
+                <li><strong>Next Meeting Date:</strong> {{ minute.next_meeting_date }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

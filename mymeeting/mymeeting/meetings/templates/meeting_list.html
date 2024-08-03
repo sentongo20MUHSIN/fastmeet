@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+{% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                   <p><strong>{{ message }}</strong></p> 
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+<h1 class="display-4">Meeting Details</h1>
+<p class="lead font-italic">Below are the details for the meeting</p>
+<hr class="my-4">
+<h2>Meeting: {{ meeting.title }}</h2>
+<p><strong>Chair of the Meeting:</strong> {{ meeting.chair_meeting }}</p>
+<p><strong>Date & Time:</strong> {{ meeting.date }}</p>
+<p><strong>Location:</strong> {{ meeting.location }}</p>
+<p><strong>Purpose:</strong> {{ meeting.description|safe }}</p>
+
+{% if not meeting.is_completed %}
+    <div class="alert alert-warning" role="alert">
+        This meeting is not yet completed. You can only generate or download the PDF after the meeting is completed.
+    </div>
+{% elif meeting.is_completed %}
+    <a href="{% url 'generate_pdf' meeting.id %}" class="btn btn-primary">Generate PDF</a>
+{% endif %}
+
+{% endblock %}

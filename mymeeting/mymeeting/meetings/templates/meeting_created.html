@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+{% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+<div class="container">
+    <h1 class="display-4">Meeting Created</h1>
+    <p class="lead font-italic">Share this link to join the meeting:</p>
+    <hr class="my-4">
+    <div class="meeting-details">
+        <h2>Meeting: {{ meeting.title }}</h2>
+        <p><strong>Chair:</strong> {{ meeting.chair_meeting }}</p>
+        <p><strong>Date & Time:</strong> {{ meeting.date }}</p>
+        <p><strong>Location:</strong> {{ meeting.location }}</p>
+        <p><strong>Purpose:</strong> {{ meeting.description|safe }}</p>
+    </div>
+    <div class="join-link">
+        <h2> Share the link for others to Join Meeting:</h2>
+        <a href="{{ join_url }}">{{ join_url }}</a>
+    </div>
+    <div class="addlink">
+        <h2>Tap The Button to Start Meeting:</h2>
+        <div class="col-md-8">
+            <a href="{% url 'add_minutes' meeting.id %}" class="btn btn-success btn-block btn-lg">
+                <i class="fas fa-stream"></i> Add Minutes
+            </a> 
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
